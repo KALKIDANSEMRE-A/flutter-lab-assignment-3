@@ -58,16 +58,16 @@ class AlbumsPage extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
-                border: Border.all(color: Colors.grey[400]!),
+                color: Colors.primaries[album.id % Colors.primaries.length],
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  'X',
-                  style: TextStyle(
-                    fontSize: 24,
+                  '${album.id}',
+                  style: const TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey,
+                    color: Colors.white,
                   ),
                 ),
               ),

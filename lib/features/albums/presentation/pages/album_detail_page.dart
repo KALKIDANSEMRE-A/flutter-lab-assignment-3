@@ -4,21 +4,27 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:album_app/features/albums/presentation/bloc/albums_bloc.dart';
 import 'package:album_app/features/albums/domain/models/photo.dart';
 
-class AlbumDetailPage extends StatelessWidget {
+class AlbumDetailPage extends StatefulWidget {
   final int albumId;
 
   const AlbumDetailPage({super.key, required this.albumId});
 
   @override
+  State<AlbumDetailPage> createState() => _AlbumDetailPageState();
+}
+
+class _AlbumDetailPageState extends State<AlbumDetailPage> {
+  String totalPhotosText = 'Loading...';
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Album $albumId'),
+        title: Text('Album ${widget.albumId}'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Column(
         children: [
-          // Album Header with Image
           Container(
             margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -29,28 +35,27 @@ class AlbumDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Album Image Placeholder
                 Container(
                   height: 200,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Colors
+                        .primaries[widget.albumId % Colors.primaries.length],
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(8),
                       topRight: Radius.circular(8),
                     ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
-                      'X',
-                      style: TextStyle(
-                        fontSize: 48,
+                      'Album ${widget.albumId}',
+                      style: const TextStyle(
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-                // Album Details
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -58,22 +63,12 @@ class AlbumDetailPage extends StatelessWidget {
                     children: [
                       _buildDetailSection(
                         'About Album',
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+                        'This album contains photos from the JSONPlaceholder API. Each photo is a placeholder image that can be used for testing and development purposes.',
                       ),
                       const SizedBox(height: 16),
                       _buildDetailSection(
-                        'Date of Published',
-                        'January 15, 2024',
-                      ),
-                      const SizedBox(height: 16),
-                      _buildDetailSection(
-                        'Owner of the Album',
-                        'John Doe Music Productions',
-                      ),
-                      const SizedBox(height: 16),
-                      _buildDetailSection(
-                        'Patent Right',
-                        '© 2024 All Rights Reserved. This album is protected under international copyright laws.',
+                        'Total Photos',
+                        totalPhotosText,
                       ),
                     ],
                   ),
@@ -81,19 +76,22 @@ class AlbumDetailPage extends StatelessWidget {
               ],
             ),
           ),
-          // Photos Section
           Expanded(
             child: BlocBuilder<AlbumsBloc, AlbumsState>(
               builder: (context, state) {
                 if (state is AlbumsInitial) {
-                  context.read<AlbumsBloc>().add(LoadPhotos(albumId));
+                  context.read<AlbumsBloc>().add(LoadPhotos(widget.albumId));
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is AlbumsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is PhotosLoaded) {
+                  if (totalPhotosText == 'Loading...') {
+                    setState(() {
+                      totalPhotosText = '${state.photos.length} photos';
+                    });
+                  }
                   return Column(
                     children: [
-                      // Photos Grid Title
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
@@ -117,11 +115,11 @@ class AlbumDetailPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Photos Grid
                       Expanded(
                         child: GridView.builder(
                           padding: const EdgeInsets.all(8),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             childAspectRatio: 1,
                             crossAxisSpacing: 8,
@@ -146,7 +144,8 @@ class AlbumDetailPage extends StatelessWidget {
                                           child: CircularProgressIndicator(),
                                         ),
                                       ),
-                                      errorWidget: (context, url, error) => Container(
+                                      errorWidget: (context, url, error) =>
+                                          Container(
                                         color: Colors.grey[300],
                                         child: const Icon(Icons.error),
                                       ),
@@ -178,7 +177,9 @@ class AlbumDetailPage extends StatelessWidget {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            context.read<AlbumsBloc>().add(LoadPhotos(albumId));
+                            context
+                                .read<AlbumsBloc>()
+                                .add(LoadPhotos(widget.albumId));
                           },
                           child: const Text('Retry'),
                         ),

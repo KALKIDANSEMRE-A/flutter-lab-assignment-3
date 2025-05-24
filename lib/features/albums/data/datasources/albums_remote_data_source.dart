@@ -15,28 +15,36 @@ class AlbumsRemoteDataSourceImpl implements AlbumsRemoteDataSource {
 
   @override
   Future<List<Album>> getAlbums() async {
+    print('Fetching albums from API...');
     final response = await client.get(
       Uri.parse('https://jsonplaceholder.typicode.com/albums'),
     );
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body);
-      return jsonList.map((json) => Album.fromJson(json)).toList();
+      final albums = jsonList.map((json) => Album.fromJson(json)).toList();
+      print('Successfully fetched ${albums.length} albums');
+      return albums;
     } else {
+      print('Failed to load albums. Status code: ${response.statusCode}');
       throw Exception('Failed to load albums');
     }
   }
 
   @override
   Future<List<Photo>> getPhotos(int albumId) async {
+    print('Fetching photos for album $albumId from API...');
     final response = await client.get(
       Uri.parse('https://jsonplaceholder.typicode.com/photos?albumId=$albumId'),
     );
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body);
-      return jsonList.map((json) => Photo.fromJson(json)).toList();
+      final photos = jsonList.map((json) => Photo.fromJson(json)).toList();
+      print('Successfully fetched ${photos.length} photos for album $albumId');
+      return photos;
     } else {
+      print('Failed to load photos. Status code: ${response.statusCode}');
       throw Exception('Failed to load photos');
     }
   }
